@@ -1,0 +1,194 @@
+---
+title: "Class 7 R functions and packages"
+author: "Yutong Wu"
+date: "10/22/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#R functions revisited 
+
+Source my functions from last day
+
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+
+```{r}
+rescale(1:10)
+```
+
+```{r}
+rescale(c(1,10,5,NA,6))
+```
+
+!is.numeric()
+! flips the logical value output from the function 
+
+
+
+
+## A new function called both_na()
+Write a function to find where there re NA elements in two input vectors.
+
+First makes some simple inuput hwere I know the answers.
+
+```{r}
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3, 4)
+```
+
+Looked online and found the **is.na()** function 
+```{r}
+is.na(x)
+```
+
+and the **which()** function tells me where the TRUE values are 
+```{r}
+which(is.na(x))
+```
+
+```{r}
+which(is.na(y))
+```
+
+```{r}
+is.na(x)
+is.na(y)
+```
+
+The AND function requries two input TRUE to give a TRUE output 
+```{r}
+is.na(x) & is.na(y)
+```
+
+Taking the **sum()** of TRUE FALSE vector will tell me how many TRUE elements I have. 
+This is my working snippet!
+```{r}
+sum(is.na(x) & is.na(y))
+#TRUE represents 1 in R and FALSE equals 0
+```
+
+```{r}
+sum(c(True))
+#TRUE represents 1 in R and FALSE equals 0
+```
+
+Now turn it into a function.
+```{r}
+both_na <- function (x,y) {
+  sum(is.na(x) & is.na(y))
+}
+```
+
+```{r}
+both_na(x,y)
+```
+
+```{r}
+x <- c(1, NA, NA)
+y1 <- c( 1, NA, NA)
+y2 <- c( 1, NA, NA, NA, NA, NA, NA)
+both_na(x,y2)
+both_na(x,y1)
+```
+
+Show how R recycles 
+```{r}
+plot(1:10, col=c("red","blue","green"))
+```
+
+```{r}
+length(x)
+length(y2)
+```
+
+
+```{r}
+both_na <- function (x,y) {
+  
+  if (length(x)!= length(y)) {
+    z <- length (x) != length(y)
+    stop("Inputs x and y should be the same length!")
+  }
+  sum(is.na(x) & is.na(y))
+}
+```
+
+```{r}
+both_na(x,y)
+```
+
+```{r}
+x1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+x2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+```
+
+```{r}
+grade <- function (x) {
+  if (sum(is.na(x)) > 0) {
+    return(x[-which(is.na(x))])
+  }
+  min <- min(x)
+  x[-which.min(x)]
+}
+```
+
+
+```{r}
+grade(x1)
+```
+
+```{r}
+which.min(x2)
+x2[-which.min(x2)]
+mean(x2[-which.min(x2)], na.rm = TRUE)
+```
+
+```{r}
+any(is.na(x2))
+any(is.na(x1))
+```
+
+
+We have our workin gcode now turn it into a first function
+```{r}
+grade <- function(x) {
+  if (any(is.na(x))) {
+    warning("Student is missing a homework")
+  }
+  mean ( x[-which.min(x)], na.rm=TRUE)
+}
+  
+```
+
+```{r}
+grade(x1)
+```
+```{r}
+grade(x2)
+```
+
+
+```{r}
+url <- "https://tinyurl.com/gradeinput"
+hw <- read.csv(url, row.names=1)
+
+hw
+```
+
+```{r}
+apply(hw,1,grade)
+#1 represents row, 2 represents column
+```
+
+
+
+
+
+
+
