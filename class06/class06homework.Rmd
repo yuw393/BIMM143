@@ -1,0 +1,81 @@
+---
+title: "class06homework"
+author: "Yutong Wu"
+date: "10/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install the **bio3d** package in Console for sequence and structure analysis.
+
+```{r}
+#install.packages("bio3d") in Console
+```
+
+# This is the originally supplied code snippets:
+
+```{r}
+library(bio3d) #call the functions in bio3d package
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+# Now here is the more robust and re-usable function: 
+## This function can take any of the three listed input proteins and plot the effect of drug binding
+
+```{r}
+protein.plot <-function(x){
+  s1 <- read.pdb(x) 
+  s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+  s1.b <- s1.chainA$atom$b
+  plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+}
+```
+
+# Documentation:
+
+**Input to the function:**
+Input to the function is the Protein Data Bank (PDB) coordinate file of a specific protein/kinase
+  
+**What the function does:** 
+The function takes the PDB coordinate file of a specific protein/kinase, trims it into a smaller PDB object that contain a subset of atoms by selecting a specific alpha strand on a specific chain (Chain A) of the protein/kinase, then assigns a variable that indicates file information particularly describing atom position b at Chain A of the kinase, finally draw a line plot of this variable/information
+
+**How to use this function:**
+Simply type the code protein.plot(), put the PDB file name of the target kinase within parenthases
+
+**Output of the function:**
+Output of the function is the line plot that describes atom postion b at Chain A of the specific kinase input, with optional secondary structure in the marginal regions.
+
+
+# Now we try to use this function with the three kinase inputs:
+
+```{r}
+protein.plot("4AKE")
+protein.plot("1AKE")
+protein.plot("1E4Y")
+```
+
+
+
+
+
+
+
+
+
