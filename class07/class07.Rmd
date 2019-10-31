@@ -74,7 +74,6 @@ sum(is.na(x) & is.na(y))
 ```
 
 ```{r}
-sum(c(True))
 #TRUE represents 1 in R and FALSE equals 0
 ```
 
@@ -119,9 +118,7 @@ both_na <- function (x,y) {
 }
 ```
 
-```{r}
-both_na(x,y)
-```
+
 
 ```{r}
 x1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
