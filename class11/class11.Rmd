@@ -1,0 +1,75 @@
+---
+title: "Class 11: Structural Bioinformatics 1"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The PDB database for biomolecular structure data
+
+> Q1: Determine the percentage of structures solved by X-Ray and Electron Microscopy. 
+
+> Determine what proportion of structures are protein? 
+
+Download CSV file from PDB website ("Analyze > "PDB Statistics" > "by Experimental Method and Molecular Type")
+
+```{r}
+# Read CVS
+data <- read.csv("Data Export Summary.csv",row.names = 1)
+data
+```
+
+Total number of entries
+```{r}
+sum(data$Total)
+```
+
+Proportion of entries from each method
+```{r}
+#Percentages of structures solved by X-Ray and Electron Microscopy
+data$Total / sum(data$Total)* 100
+
+#Proportion of structures are protein
+round((sum(data$Proteins)/sum(data$Total))*100,2)
+#use round to restrain the number of significant figures to 2 figures 
+```
+
+## HIV-Pr structure analysis
+
+Here we will read the 1HSG PDB structure and select the protein component and write out a new 
+
+```{r}
+library(bio3d)
+
+pdb <- read.pdb("1hsg.pdb")
+pdb
+#read.pdb()
+#atom.select()
+#write.pdb()
+#trim.pdb()
+```
+
+
+```{r}
+ligand <- atom.select(pdb, "ligand", value = TRUE)
+write.pdb(ligand, file ="1hsg_ligand.pdb")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

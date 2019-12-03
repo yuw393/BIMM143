@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Prep for docking 
 
-We want to produce a protein-only PDB file and a drug only PDB file. 
+We want to produce a protein-only PDB file and a drug-only PDB file. 
 
 ```{r}
 library(bio3d)
@@ -22,7 +22,14 @@ get.pdb("1hsg")
 #clean for protein
 pdb <- read.pdb("1hsg.pdb")
 protein <- atom.select(pdb, "protein", value = TRUE)
+prot <- trim.pdb(pdb,"protein")
+prot
+protein
 write.pdb(protein,file="1hsg_protein.pdb")
+#get a listing of all reside values in this structure
+#pdb$atom$resid
+
+#str(pdb)
 ```
 
 and for the ligand
@@ -31,4 +38,24 @@ and for the ligand
 ligand <- atom.select(pdb, "ligand", value=TRUE)
 write.pdb(ligand, file="1hsg_ligand.pdb")
 ```
+
+
+## Process our docking results
+
+```{r}
+library(bio3d)
+res <- read.pdb("all.pdbqt", multi=TRUE)
+#multi: multimodal file
+write.pdb(res, "results.pdb")
+```
+
+
+
+
+
+
+
+
+
+
 

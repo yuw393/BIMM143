@@ -1,4 +1,11 @@
-# Section 2A scatterplots
+#' ---
+#' title: "class05"
+#' output: github_document
+#' ---
+
+
+
+#' # Section 2A scatterplots
 # lets read our input file first
 
 read.table("bimm143_05_rstats/weight_chart.txt")

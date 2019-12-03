@@ -1,0 +1,264 @@
+---
+title: "Class 14: "
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DEsdq2 setup
+
+We will use the DESeq2 package from bioconductor. To install this we ran **in the CONSOLE** - note eval=FALSE option: (we show this code but we don't run it)
+```{r eval=FALSE}
+install.packages("BiocManager")
+BiocManager::install()
+#For this calss, you'll also need DESeq2
+BiocManager::install("DESeq2")
+```
+
+#Input Dataset
+
+Input counData and colData (metadata)
+
+```{r}
+counts <- read.csv("data/airway_scaledcounts.csv", stringsAsFactors = FALSE)
+metadata <-  read.csv("data/airway_metadata.csv", stringsAsFactors = FALSE)
+```
+
+Have a peak...
+```{r}
+structure(counts)
+head(counts)
+#Columns indicate the name of experiment
+#rows represent different genes
+#The number here represents the number of DNA fragments
+```
+
+```{r}
+head(metadata)
+```
+
+How many genes do we have in this dataset?
+```{r}
+nrow(counts)
+```
+
+How many exps do we have
+```{r}
+ncol(counts)
+#we have 8 exps because the first column indicates the types of genes 
+```
+
+```{r}
+nrow(metadata)
+```
+
+```{r}
+View(metadata)
+```
+
+We want to know if there is a difference in expression values for all control (non-drug) vs treated (i.e. drug addded cell lines).
+
+First step is to find which experiments were the control experiments and then get the average values across all control experiments. Then we will do the same for drug treated. We will have mean value for every gene, in both control and treated conditions. 
+
+```{r}
+#the subset of the metadata that have the control experiments
+control <- metadata[metadata[,"dex"]=="control",]
+control
+
+counts[,control$id]
+control.mean <- rowSums( counts[ ,control$id] )/4 
+control.mean
+names(control.mean) <- counts$ensgene
+```
+
+Q1. How would you make the above code more robust? What would happen if you were to add more samples. Would the values obtained with the excat code above be correct?
+
+Now calculate the mean values across these control columns of **countdata** 
+
+```{r}
+control.mean <- rowSums(counts[,control$id])/length(control$id)
+names(control.mean) <- counts$ensgene
+```
+
+Q2. Follow the same procedure for the treated samples (i.e. calculate the mean per gene accross drug treated samples and assign to a labeled vector called treated.mean)
+
+Let's do the same for drug treated
+
+```{r}
+treated <- metadata[metadata[,"dex"]=="treated",]
+treated.mean <- rowSums(counts[,treated$id])/length(treated$id)
+names(treated.mean) <- counts$ensgene
+```
+
+We will combine our meancount data for bookkeeping purposes.
+
+```{r}
+meancounts <- data.frame(control.mean,treated.mean)
+meancounts
+```
+
+
+```{r}
+#Plot control vs treated! 
+plot(meancounts$control.mean,meancounts$treated.mean)
+plot(meancounts$control.mean,meancounts$treated.mean,log="xy")
+```
+
+#Exploratory Analysis
+We can find candidate differentially expressed genes by looking for genes with a large change between control and dex-treated samples. We usually look at the log2 of the fold change, because this has better mathematical properties.
+
+Here we calculate log2foldchange, add it to our meancounts data.frame and inspect the results either with the head() or the View() function for example.
+
+Calculate log2 fold change. If log2fc = 0, it means there's no change between treated and contro; if log2fc is positive, it means the drug is up-regulated (increase expression); if logfc is negative, it means the drug is down-regulated (decrease expression)
+
+```{r}
+#Make a new column in meancounts called log2fc
+meancounts$log2fc <- log2(meancounts[,"treated.mean"]/meancounts[,"control.mean"])
+
+View(meancounts)
+head(meancounts)
+```
+
+Remove expression results of 0
+Q4. What is the purpose of the arr.ind argument in the which() function? 
+
+```{r}
+x <- c(56,0,26,0)
+x==0
+which(x==0)
+```
+
+Why would we then take the first column of the output and need to call the unique() function?
+```{r}
+x <- data.frame(control=c(56,0),treated=c(26,0))
+x
+x==0
+which(x==0)
+which(x==0,arr.ind=TRUE)
+unique(which(x==0,arr.ind=TRUE)[,1])
+inds <- unique(which(x==0,arr.ind=TRUE)[,1])
+x[-inds,]
+```
+
+```{r}
+x <- data.frame(control=c(56,0,5),treated=c(26,0,0))
+x
+which(x==0,arr.ind=TRUE)
+```
+
+
+```{r}
+which(meancounts[,1:2]==0, arr.ind=TRUE)
+zero.vals <- which(meancounts[,1:2]==0, arr.ind=TRUE)
+zero.vals
+to.rm <- unique(zero.vals[,1])
+mycounts <- meancounts[-to.rm,]
+head(mycounts)
+```
+
+A common threshold used for calling something differentially expressed is a log2(FoldChange) of greater than 2 or less than -2. Let’s filter the dataset both ways to see how many genes are up or down-regulated.
+
+```{r}
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+```
+
+Number of genes having more expression when treated
+```{r}
+sum(up.ind)
+```
+Number of genes having less expression when treated
+```{r}
+sum(down.ind)
+```
+
+```{r}
+head(mycounts[up.ind,])
+```
+
+# DESeq2 analysis
+Let’s do this the right way. DESeq2 is an R package for analyzing count-based NGS data like RNA-seq. It is available from Bioconductor. Bioconductor is a project to provide tools for analyzing high-throughput genomic data including RNA-seq, ChIP-seq and arrays. 
+
+```{r}
+library(DESeq2)
+```
+
+DESeq works on a particular type of object called a **DESeqDataSet**. The DESeqDataSet is a single object that contains input values, intermediate calculations like how things are normalized, and all results of a differential expression analysis.
+
+You can construct a DESeqDataSet from (1) a count matrix, (2) a metadata file, and (3) a formula indicating the design of the experiment.
+
+The third needed item that has to be specified at the beginning of the analysis is a design formula. This tells DESeq2 which columns in the sample information table (colData) specify the experimental design (i.e. which groups the samples belong to) and how these factors should be used in the analysis. Essentially, this formula expresses how the counts for each gene depend on the variables in colData.
+
+The thing we’re interested in is the dex column, which tells us which samples are treated with dexamethasone versus which samples are untreated controls. We’ll specify the design with a tilde, like this: design=~dex
+
+We will use the **DESeqDataSetFromMatrix()** function to build the required DESeqDataSet object and call it dds, short for our DESeqDataSet. 
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+dds
+```
+
+Get the results
+```{r}
+dds <- DESeq(dds)
+res <- results(dds)
+summary(res)
+res
+```
+
+##Summary plot: a.k.a Volcano plot
+
+This figure will combine both Fold Change and the p-value into one overview figure indicating the proportion of genes with large scale significant differences in their expression.
+
+```{r}
+# Dull all-black plot
+plot(res$log2FoldChange,-log(res$padj))
+abline(v=2,col="gray")
+abline(v=c(-2,2),col="gray")
+abline(h=-log(0.05),col="gray",lty=2)
+```
+
+
+```{r}
+# Add some color please
+mycols <- rep("gray",nrow(res))
+# make points wit +2 -2 fold change blue
+mycols[ abs(res$log2FoldChange) > 2 ] <- "blue"
+
+# make points below p-value cutoff red
+mycols[(res$padj > 0.05)] <- "red"
+
+plot(res$log2FoldChange,-log(res$padj), col=mycols)
+abline(v=c(-2,2),col="gray")
+abline(h=-log(0.05),col="gray",lty=2)
+
+```
+
+Save our results for next day...
+```{r}
+write.csv(res, file="expression_results.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

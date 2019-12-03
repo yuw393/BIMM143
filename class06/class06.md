@@ -165,7 +165,7 @@ test("4AKE")
     ##   Note: Accessing on-line PDB file
 
     ## Warning in get.pdb(file, path = tempdir(), verbose = FALSE): /var/folders/
-    ## fm/lj0vdy1j63g9rd1q5q93xsyh0000gn/T//RtmpWMjWGB/4AKE.pdb exists. Skipping
+    ## fm/lj0vdy1j63g9rd1q5q93xsyh0000gn/T//RtmpMvgoeG/4AKE.pdb exists. Skipping
     ## download
 
 ![](class06_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
@@ -177,7 +177,7 @@ test("1AKE")
     ##   Note: Accessing on-line PDB file
 
     ## Warning in get.pdb(file, path = tempdir(), verbose = FALSE): /var/folders/
-    ## fm/lj0vdy1j63g9rd1q5q93xsyh0000gn/T//RtmpWMjWGB/1AKE.pdb exists. Skipping
+    ## fm/lj0vdy1j63g9rd1q5q93xsyh0000gn/T//RtmpMvgoeG/1AKE.pdb exists. Skipping
     ## download
 
     ##    PDB has ALT records, taking A only, rm.alt=TRUE
@@ -191,7 +191,7 @@ test("1E4Y")
     ##   Note: Accessing on-line PDB file
 
     ## Warning in get.pdb(file, path = tempdir(), verbose = FALSE): /var/folders/
-    ## fm/lj0vdy1j63g9rd1q5q93xsyh0000gn/T//RtmpWMjWGB/1E4Y.pdb exists. Skipping
+    ## fm/lj0vdy1j63g9rd1q5q93xsyh0000gn/T//RtmpMvgoeG/1E4Y.pdb exists. Skipping
     ## download
 
 ![](class06_files/figure-gfm/unnamed-chunk-13-3.png)<!-- -->

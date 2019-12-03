@@ -30,8 +30,6 @@ rescale(c(1,10,5,NA,6))
 ! flips the logical value output from the function 
 
 
-
-
 ## A new function called both_na()
 Write a function to find where there re NA elements in two input vectors.
 
@@ -121,8 +119,11 @@ both_na <- function (x,y) {
 
 
 ```{r}
-x1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+x1 <- c(100, 100, 100, 100, 100, 100, 100, 90,100)
 x2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+x3 <- c(100, 100, 100, 100, 100, 100, 100,90,100,NA)
+z <- length (x1) != length(x2)
+z
 ```
 
 ```{r}
@@ -138,6 +139,7 @@ grade <- function (x) {
 
 ```{r}
 grade(x1)
+grade(x3)
 ```
 
 ```{r}
@@ -152,7 +154,7 @@ any(is.na(x1))
 ```
 
 
-We have our workin gcode now turn it into a first function
+We have our working code now turn it into a first function
 ```{r}
 grade <- function(x) {
   if (any(is.na(x))) {
@@ -182,6 +184,41 @@ hw
 apply(hw,1,grade)
 #1 represents row, 2 represents column
 ```
+
+```{r}
+
+#student 1
+x <- c(100, 100, 100, 100, 100, 100, 100, 90)
+# student 2
+y <- c(100, NA, 90, 90, 90, 90, 97, 80)
+
+grade <- function(x){
+  if(sum(is.na(x))>0)
+  x <- x[-which(is.na(x))]
+  
+x <- x[-min(x)]
+sum(x)
+}
+
+grade(y)
+```
+
+```{r}
+library(BiocManager)
+BiocManager::install("DESeq2")
+library("DESeq2")
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
